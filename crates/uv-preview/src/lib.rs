@@ -327,6 +327,8 @@ pub enum PreviewFeature {
     LockfileFormatCheck,
     /// Split extra-dependent requirement markers to their production or extra context.
     CorrectExtraMarkers,
+    /// Allows frozen installations from lockfiles that omit package declaration metadata.
+    LockWithoutMetadata,
 }
 
 impl Display for PreviewFeature {

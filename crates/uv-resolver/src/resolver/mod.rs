@@ -2332,7 +2332,8 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
     where
         'data: 'parameters,
     {
-        let correct_extra_markers = uv_preview::is_enabled(PreviewFeature::CorrectExtraMarkers);
+        let correct_extra_markers = uv_preview::is_enabled(PreviewFeature::CorrectExtraMarkers)
+            || uv_preview::is_enabled(PreviewFeature::LockWithoutMetadata);
 
         self.overrides
             .apply_for_package(override_package, dependencies)
