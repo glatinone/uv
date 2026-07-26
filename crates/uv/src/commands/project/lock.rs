@@ -940,6 +940,7 @@ async fn do_lock(
             &hasher,
             state.index(),
             &database,
+            preview,
             printer,
         )
         .await
@@ -1163,6 +1164,7 @@ impl ValidatedLock {
         hasher: &HashStrategy,
         index: &InMemoryIndex,
         database: &DistributionDatabase<'_, Context>,
+        preview: Preview,
         printer: Printer,
     ) -> Result<Self, ProjectError> {
         // Perform checks in a deliberate order, such that the most extreme conditions are tested
@@ -1368,6 +1370,7 @@ impl ValidatedLock {
                 hasher,
                 index,
                 database,
+                preview.is_enabled(PreviewFeature::LockWithoutMetadata),
             )
             .await?
         {
@@ -1505,6 +1508,20 @@ impl ValidatedLock {
                 } else {
                     debug!(
                         "Resolving despite existing lockfile due to mismatched requirements for: `{name}`\n  Requested: {:?}\n  Existing: {:?}",
+                        expected, actual
+                    );
+                }
+                Ok(Self::Preferable(lock))
+            }
+            SatisfiesResult::MismatchedPackageDependencies(name, version, expected, actual) => {
+                if let Some(version) = version {
+                    debug!(
+                        "Resolving despite existing lockfile due to mismatched resolved dependencies for: `{name}=={version}`\n  Requested: {:?}\n  Existing: {:?}",
+                        expected, actual
+                    );
+                } else {
+                    debug!(
+                        "Resolving despite existing lockfile due to mismatched resolved dependencies for: `{name}`\n  Requested: {:?}\n  Existing: {:?}",
                         expected, actual
                     );
                 }
